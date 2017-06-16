@@ -46,10 +46,15 @@ const getAccessToken = () => {
         open(authUrl);
         rl.question("Input pin : ", ans => {
             oauth.getOAuthAccessToken(oauthToken, oauthSecret, ans, (err, token, secret) => {
-               process.env.ACCESS_TOKEN = token;
-               process.env.ACCESS_SECRET = secret;
-               fs.appendFileSync('.env', "ACCESS_TOKEN=" + token + '\n', 'utf8');
-               fs.appendFileSync('.env', "ACCESS_SECRET=" + secret + '\n', 'utf8');
+                if (err) {
+                    console.log(err);
+                    return;
+                } else {
+                   process.env.ACCESS_TOKEN = token;
+                   process.env.ACCESS_SECRET = secret;
+                   fs.appendFileSync('.env', "ACCESS_TOKEN=" + token + '\n', 'utf8');
+                   fs.appendFileSync('.env', "ACCESS_SECRET=" + secret + '\n', 'utf8');
+                }
             });
             rl.close();
         });
