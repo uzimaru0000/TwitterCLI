@@ -1,8 +1,11 @@
 'use strict'
 
-const TwitterAPI = require('tweeter'),
+const TwitterAPI = require('twitter'),
       OAuth = require('oauth').OAuth,
-      open = require('open');
+      open = require('open'),
+      fs = require('fs');
+
+require('dotenv').config();
 
 const readline = require('readline');
 const rl = readline.createInterface({
@@ -12,24 +15,25 @@ const rl = readline.createInterface({
 
 const oauth = new OAuth(
     "https://api.twitter.com/oauth/request_token",
-    "https://api.twitter.com/oauth/access_token",
-    env.consumer_key,
-    env.consumer_secret,
+    "https://api.twitter.com/oauth/ACCESS_TOKEN",
+    process.env.CONSUMER_KEY,
+    process.env.CONSUMER_SECRET,
     "1.0",
     null,
     "HMAC-SHA1"
 );
 
 module.exports.getTwitter = () => {
-    if (!process.env.hasOwnProperty('access_token') ||
-        !process.env.hasOwnProperty('access_secret')) {
+    if (!process.env.ACCESS_TOKEN || !process.env.ACCESS_SECRET) {
         getAccessToken();
+        fs.appendFileSync('.env', "ACCESS_TOKEN=" + process.env.ACCESS_TOKEN + '\n', 'utf8');
+        fs.appendFileSync('.env', "ACCESS_SECRET=" + process.env.ACCESS_SECRET + '\n', 'utf8');
     }
     return new TwitterAPI({
-        consumer_key: process.env.consumer_key,
-        consumer_secret: process.env.consumer_secret,
-        access_token_key: process.env.access_token,
-        access_token_secret: process.env.access_secret
+        CONSUMER_KEY: process.env.CONSUMER_KEY,
+        CONSUMER_SECRET: process.env.CONSUMER_SECRET,
+        ACCESS_TOKEN_key: process.env.ACCESS_TOKEN,
+        ACCESS_TOKEN_secret: process.env.ACCESS_SECRET
     });
 };
 
@@ -40,9 +44,10 @@ const getAccessToken = () => {
         open(authUrl);
         rl.question("Input pin : ", ans => {
             oauth.getOAuthAccessToken(oauthToken, oauthSecret, ans, (err, token, secret) => {
-               process.env.access_token = token;
-               process.env.access_secret = secret;
+               process.env.ACCESS_TOKEN = token;
+               process.env.ACCESS_SECRET = secret;
             });
+            rl.close();
         });
     });
 };
