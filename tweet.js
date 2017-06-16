@@ -26,8 +26,6 @@ const oauth = new OAuth(
 module.exports.getTwitter = () => {
     if (!process.env.ACCESS_TOKEN || !process.env.ACCESS_SECRET) {
         getAccessToken();
-        fs.appendFileSync('.env', "ACCESS_TOKEN=" + process.env.ACCESS_TOKEN + '\n', 'utf8');
-        fs.appendFileSync('.env', "ACCESS_SECRET=" + process.env.ACCESS_SECRET + '\n', 'utf8');
     }
     return new TwitterAPI({
         CONSUMER_KEY: process.env.CONSUMER_KEY,
@@ -39,13 +37,19 @@ module.exports.getTwitter = () => {
 
 const getAccessToken = () => {
     oauth.getOAuthRequestToken((error, oauthToken, oauthSecret, results) => {
-        if (error) return;
+        if (error) {
+            console.log(error);
+            rl.close();
+            return;
+        }
         const authUrl = 'https://api.twitter.com/oauth/authorize?oauth_token=' + oauthToken;
         open(authUrl);
         rl.question("Input pin : ", ans => {
             oauth.getOAuthAccessToken(oauthToken, oauthSecret, ans, (err, token, secret) => {
                process.env.ACCESS_TOKEN = token;
                process.env.ACCESS_SECRET = secret;
+               fs.appendFileSync('.env', "ACCESS_TOKEN=" + token + '\n', 'utf8');
+               fs.appendFileSync('.env', "ACCESS_SECRET=" + secret + '\n', 'utf8');
             });
             rl.close();
         });
