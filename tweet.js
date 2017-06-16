@@ -15,7 +15,7 @@ const rl = readline.createInterface({
 
 const oauth = new OAuth(
     "https://api.twitter.com/oauth/request_token",
-    "https://api.twitter.com/oauth/ACCESS_TOKEN",
+    "https://api.twitter.com/oauth/access_token",
     process.env.CONSUMER_KEY,
     process.env.CONSUMER_SECRET,
     "1.0",
@@ -27,11 +27,12 @@ module.exports.getTwitter = () => {
     if (!process.env.ACCESS_TOKEN || !process.env.ACCESS_SECRET) {
         getAccessToken();
     }
+    rl.close();
     return new TwitterAPI({
-        CONSUMER_KEY: process.env.CONSUMER_KEY,
-        CONSUMER_SECRET: process.env.CONSUMER_SECRET,
-        ACCESS_TOKEN_key: process.env.ACCESS_TOKEN,
-        ACCESS_TOKEN_secret: process.env.ACCESS_SECRET
+        consumer_key: process.env.CONSUMER_KEY,
+        consumer_secret: process.env.CONSUMER_SECRET,
+        access_token_key: process.env.ACCESS_TOKEN,
+        access_token_secret: process.env.ACCESS_SECRET
     });
 };
 
@@ -39,7 +40,6 @@ const getAccessToken = () => {
     oauth.getOAuthRequestToken((error, oauthToken, oauthSecret, results) => {
         if (error) {
             console.log(error);
-            rl.close();
             return;
         }
         const authUrl = 'https://api.twitter.com/oauth/authorize?oauth_token=' + oauthToken;
@@ -56,7 +56,6 @@ const getAccessToken = () => {
                    fs.appendFileSync('.env', "ACCESS_SECRET=" + secret + '\n', 'utf8');
                 }
             });
-            rl.close();
         });
     });
 };
