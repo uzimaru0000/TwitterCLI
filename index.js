@@ -8,6 +8,7 @@ const command = () => {
     program.version('0.0.1')
        .option('-t, --tweet <tweet>', '<tweet>をつぶやきます')
        .option('-l, --time-line [num]', '[num]個のツイートをタイムラインから表示', x => parseInt(x), 10)
+       .option('-s, --streaming', 'streamingAPIでツイートを取得します')
        .parse(process.argv);
 
     if (program.tweet) {
@@ -15,18 +16,30 @@ const command = () => {
             if (!err) console.log('"' + tweet.text + '"' + 'と呟きました。');
             else console.log(err);
         });
+    } else if (program.streaming) {
+        twitter.get('statuses/home_timeline', {count: program.timeLine}, (err, tweets, res) => {
+            tweets.reverse();
+            tweets.forEach(x => printTweet(x));
+        });
+        twitter.stream('user', {}, stream => {
+            stream.on('data', data => { 
+                printTweet(data);
+            });
+        });
     } else if (program.timeLine) {
         twitter.get('statuses/home_timeline', {count: program.timeLine}, (err, tweets, res) => {
             tweets.reverse();
-            tweets.forEach(x => {
-                console.log("─" + x.user.name + " <@" + x.user.screen_name + '> ──────────');
-                console.log(x.text + "\n");
-            });
+            tweets.forEach(x => printTweet(x));
         });
-    }
+    } 
 };
 
 
 if (twitter.options.consumer_key) {
     command();
 }
+
+const printTweet = data => {
+    console.log("─" + data.user.name + " <@" + data.user.screen_name + '> ──────────');
+    console.log(data.text + "\n");
+};
