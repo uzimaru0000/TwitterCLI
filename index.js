@@ -4,6 +4,9 @@
 const program = require('commander');
 const twitter = require('./tweet.js').getTwitter();
 
+const green = '\u001b[32m';
+const reset = '\u001b[0m';
+
 const command = () => {
     program.version('0.0.1')
        .option('-t, --tweet <tweet>', '<tweet>をつぶやきます')
@@ -40,6 +43,6 @@ if (twitter.options.consumer_key) {
 }
 
 const printTweet = data => {
-    console.log("─" + data.user.name + " <@" + data.user.screen_name + '> ──────────');
+    console.log(green + data.user.name + " <@" + data.user.screen_name + '>' + reset);
     console.log(data.text + "\n");
 };
